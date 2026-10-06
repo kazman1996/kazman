@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <!-- Добавленная на главный экран (iPhone/Android) игра открывается без панелей браузера. -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>КАЗМАН</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0a0a0a;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      /* На телефоне: без выделения текста, зума двойным тапом и «резинки». */
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      overscroll-behavior: none;
+    }
+    /* Своего размера у #app нет (всё внутри — fixed), а браузер не
+       разворачивает во весь экран элемент нулевого размера. */
+    #app { position: fixed; inset: 0; background: #0a0a0a; }
+    #game-root {
+      /* Только на игре: ползунки громкости (HTML) должны тянуться пальцем. */
+      touch-action: none;
+      /* fixed + inset: высота — видимая часть экрана, без адресной строки
+         (100vh на телефоне её включает, и низ игры уезжал за край).
+         Центрирует канвас сам Phaser (autoCenter) — без flex, иначе
+         отступ считается дважды и игра съезжает вправо/вниз. */
+      position: fixed;
+      inset: 0;
+    }
+    /* Telegram во весь экран рисует поверх игры свои кнопки («Закрыть», «⋯»)
+       и вырез камеры — игра встаёт ниже и между ними (переменные задаёт его SDK). */
+    body.tg #game-root {
+      top: calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
+      bottom: calc(var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px));
+      left: calc(var(--tg-safe-area-inset-left, 0px) + var(--tg-content-safe-area-inset-left, 0px));
+      right: calc(var(--tg-safe-area-inset-right, 0px) + var(--tg-content-safe-area-inset-right, 0px));
+    }
+    canvas {
+      image-rendering: -webkit-optimize-contrast;
+    }
+    /* Игра горизонтальная: на телефоне в портретной ориентации просим повернуть. */
+    #rotate-hint {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #0a0a0a;
+      color: #f5e6b8;
+      font-family: monospace;
+      font-size: 18px;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    @media (orientation: portrait) and (pointer: coarse) {
+      #rotate-hint { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <!-- #app: холст и HTML поверх игры. Во весь экран разворачивается он целиком
+       (game.js fullscreenTarget), иначе окна поверх холста не видно. -->
+  <div id="app">
+    <div id="game-root"></div>
+  </div>
+  <div id="rotate-hint">📱↻<br><br>Поверните телефон горизонтально</div>
+
+  <!-- Phaser лежит в проекте (vendor/), а не на CDN: площадки требуют,
+       чтобы игра работала из своего архива. SDK площадки подключает
+       platform/Platform.js сам, только когда игра запущена на площадке. -->
+  <script src="./vendor/phaser.min.js"></script>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
